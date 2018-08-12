@@ -1,0 +1,41 @@
+#Zepplin Notebook to test Glue-to-DynamoDB transfer job
+# https://docs.aws.amazon.com/glue/latest/dg/dev-endpoint-notebook-server-considerations.html
+#In addition to role permissions, the notebook requires a DynamoDB VPCe to run.
+
+import sys
+from awsglue.transforms import *
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from awsglue.context import GlueContext
+from awsglue.job import Job
+import boto3
+#import uuid
+
+glueContext = GlueContext(sc)
+sourceTable = "glueCatalogTableName"
+
+#Set up DynamicFrame in Glue and map sourceTable
+datasource0 = glueContext.create_dynamic_frame.from_catalog(database = "default", table_name = sourceTable, transformation_ctx = "datasource0")
+applymapping1 = ApplyMapping.apply(frame = datasource0, mappings = [("col0", "string", "col0", "string"), ("col1", "string", "col1", "string")], transformation_ctx = "applymapping1")
+
+#Move DynamicFrame to DataFrame
+dfPairs = applymapping1.toDF()
+
+#Function to be called against each row.
+def rowToDDB(row):
+    #Initialize client & set table environment is required within the loop due to threads/locking.
+    client = boto3.client("dynamodb", region_name="us-east-1")
+    ddbTableOut = "outputTableDynamoDB"
+    
+    #Set mapping between columns & DynamoDB table attributes
+    ddbObj = {
+        "k":{"S":row.col1},
+        "Op":{"S":row.col0}
+        }
+
+    response = client.put_item(TableName=ddbTableOut, Item=ddbObj)
+    return(response)
+
+#Map each row to the DynamoDB PUT api function --> .collect() to run each row-put function
+dfPairs.rdd.map(rowToDDB).collect()
+
