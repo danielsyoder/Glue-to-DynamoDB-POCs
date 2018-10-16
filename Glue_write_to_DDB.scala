@@ -29,7 +29,7 @@ import org.apache.hadoop.mapred.FileOutputCommitter
 
 val glueContext:GlueContext = new GlueContext(sc)
 
-//Addresses DirectOutConnector error
+//Addresses DirectOutputCommiter error
 sc.hadoopConfiguration.set("mapred.output.committer.class", "org.apache.hadoop.mapred.FileOutputCommitter")
 
 //Set DynamoDB tables, region, and r/w percent
