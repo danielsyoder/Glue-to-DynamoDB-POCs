@@ -37,15 +37,15 @@ var ddbConf = new JobConf(sc.hadoopConfiguration)
 ddbConf.set("dynamodb.servicename", "dynamodb")
 ddbConf.set("dynamodb.endpoint", "dynamodb.us-east-1.amazonaws.com")
 ddbConf.set("dynamodb.regionid", "us-east-1")
-ddbConf.set("dynamodb.input.tableName", "amzn_boks")
-ddbConf.set("dynamodb.output.tableName", "amzn_boks")
+ddbConf.set("dynamodb.input.tableName", "InputTableName")
+ddbConf.set("dynamodb.output.tableName", "OutputTableName")
 ddbConf.set("dynamodb.throughput.write.percent", "1.1")
 ddbConf.set("dynamodb.throughput.read.percent", "1.1")
 ddbConf.set("mapred.input.format.class", "org.apache.hadoop.dynamodb.read.DynamoDBInputFormat")
 ddbConf.set("mapred.output.format.class", "org.apache.hadoop.dynamodb.write.DynamoDBOutputFormat")
 
 //Set source table as any Glue indexed table
-val datasource0 = glueContext.getCatalogSource(database = "default", tableName = "amz_books_cleaned", redshiftTmpDir = "", transformationContext = "datasource0").getDynamicFrame()
+val datasource0 = glueContext.getCatalogSource(database = "default", tableName = "GlueTableCleaned", redshiftTmpDir = "", transformationContext = "datasource0").getDynamicFrame()
 
 //Map each column (cannot have null items)
 val applymapping1 = datasource0.applyMapping(mappings = Seq(("marketplace", "string", "marketplace", "string"), ("customer_id", "string", "customer_id", "string"), ("review_id", "string", "review_id", "string"), ("product_id", "string", "product_id", "string"), ("product_parent", "string", "product_parent", "string"), ("product_title", "string", "product_title", "string"), ("star_rating", "int", "star_rating", "string"), ("helpful_votes", "int", "helpful_votes", "string"), ("total_votes", "int", "total_votes", "string"), ("vine", "string", "vine", "string"), ("verified_purchase", "string", "verified_purchase", "string"), ("rev_head", "string", "review_headline", "string"), ("rev_body", "string", "review_body", "string"), ("review_date", "date", "review_date", "string"), ("year", "int", "year", "string"), ("product_category", "string", "product_category", "string")), caseSensitive = false, transformationContext = "applymapping1")
